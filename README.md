@@ -3,6 +3,7 @@
 ![CI](https://github.com/mohammad-azimi/RepoBoost/actions/workflows/ci.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
+![RepoBoost](https://img.shields.io/badge/RepoBoost-A%20%7C%20100%25-brightgreen)
 
 RepoBoost is a command-line tool that audits a GitHub repository and suggests practical improvements for better open-source presentation.
 
@@ -21,6 +22,7 @@ It checks whether a project has the basic things visitors expect before they sta
 - Suggests useful GitHub topics
 - Detects project type, languages, frameworks, and tools
 - Recommends project-specific next steps
+- Generates a RepoBoost README badge
 - Saves scan reports as JSON files
 - Supports JSON output for automation
 - Supports score thresholds for CI usage
@@ -103,6 +105,18 @@ Print recommendations as JSON:
 
 ```bash
 repoboost recommend . --json
+```
+
+Generate a README badge:
+
+```bash
+repoboost badge .
+```
+
+Print badge data as JSON:
+
+```bash
+repoboost badge . --json
 ```
 
 Get JSON output in the terminal:
@@ -205,6 +219,12 @@ medium  automation      Add a GitHub Actions usage example
 low     code-quality    Add pre-commit hooks
 ```
 
+## Badge Example
+
+```markdown
+![RepoBoost](https://img.shields.io/badge/RepoBoost-A%20%7C%20100%25-brightgreen)
+```
+
 ## JSON Report Example
 
 ```json
@@ -268,6 +288,12 @@ Get project recommendations:
 repoboost recommend .
 ```
 
+Generate a README badge:
+
+```bash
+repoboost badge .
+```
+
 Save a report file:
 
 ```bash
@@ -284,7 +310,6 @@ repoboost scan . --fail-under 90
 
 - Add automatic README section generation
 - Add smarter GitHub topic suggestions
-- Add repository badge generation
 - Add GitHub Actions integration
 - Add portfolio-readiness score
 

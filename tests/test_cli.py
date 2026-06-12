@@ -193,6 +193,38 @@ def test_cli_recommend_prints_json(tmp_path):
     assert "Publish the CLI package to PyPI" in titles
 
 
+def test_cli_badge_outputs_markdown(tmp_path):
+    create_good_project(tmp_path)
+
+    result = runner.invoke(
+        app,
+        ["badge", str(tmp_path)],
+    )
+
+    assert result.exit_code == 0
+    assert "RepoBoost badge" in result.output
+    assert "![RepoBoost]" in result.output
+    assert "img.shields.io" in result.output
+
+
+def test_cli_badge_prints_json(tmp_path):
+    create_good_project(tmp_path)
+
+    result = runner.invoke(
+        app,
+        ["badge", str(tmp_path), "--json"],
+    )
+
+    assert result.exit_code == 0
+
+    data = json.loads(result.output)
+
+    assert data["label"] == "RepoBoost"
+    assert data["message"] == "A | 100%"
+    assert data["color"] == "brightgreen"
+    assert "img.shields.io" in data["url"]
+
+
 def create_good_project(tmp_path):
     readme = tmp_path / "README.md"
     readme.write_text(

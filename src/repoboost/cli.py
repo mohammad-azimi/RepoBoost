@@ -9,6 +9,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 from repoboost import __version__
+from repoboost.badges import generate_badge
 from repoboost.project import ProjectProfile, inspect_project
 from repoboost.recommendations import Recommendation, generate_recommendations
 from repoboost.scanner import CheckResult, ScanReport, scan_project
@@ -285,6 +286,44 @@ def recommend(
         return
 
     _render_recommendations(path, recommendations)
+
+
+@app.command()
+def badge(
+    path: Path = typer.Argument(
+        Path("."),
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        readable=True,
+        resolve_path=True,
+        help="Path to the repository you want a RepoBoost badge for.",
+    ),
+    json_output: bool = typer.Option(
+        False,
+        "--json",
+        help="Print badge data as JSON.",
+    ),
+) -> None:
+    """
+    Generate a Markdown badge based on the repository RepoBoost score.
+    """
+    badge_data = generate_badge(path)
+
+    if json_output:
+        console.print_json(data=badge_data.to_dict())
+        return
+
+    console.print()
+    console.print(
+        Panel.fit(
+            "[bold]RepoBoost badge[/bold]\nCopy this Markdown into your README.",
+            title="Badge",
+            border_style="blue",
+        )
+    )
+    console.print(badge_data.markdown)
+    console.print()
 
 
 def _render_report(report: ScanReport) -> None:
