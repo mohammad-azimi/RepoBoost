@@ -225,6 +225,62 @@ def test_cli_badge_prints_json(tmp_path):
     assert "img.shields.io" in data["url"]
 
 
+def test_cli_ci_outputs_workflow(tmp_path):
+    result = runner.invoke(
+        app,
+        ["ci", str(tmp_path)],
+    )
+
+    assert result.exit_code == 0
+    assert "GitHub Actions workflow" in result.output
+    assert "name: RepoBoost" in result.output
+    assert "repoboost scan . --fail-under 80" in result.output
+
+
+def test_cli_ci_saves_workflow_file(tmp_path):
+    output_file = tmp_path / ".github" / "workflows" / "repoboost.yml"
+
+    result = runner.invoke(
+        app,
+        [
+            "ci",
+            str(tmp_path),
+            "--output",
+            str(output_file),
+            "--fail-under",
+            "90",
+            "--python-version",
+            "3.11",
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert output_file.exists()
+    assert "Saved workflow" in result.output
+
+    content = output_file.read_text(encoding="utf-8")
+
+    assert "name: RepoBoost" in content
+    assert 'python-version: "3.11"' in content
+    assert "repoboost scan . --fail-under 90" in content
+
+
+def test_cli_ci_prints_json(tmp_path):
+    result = runner.invoke(
+        app,
+        ["ci", str(tmp_path), "--json"],
+    )
+
+    assert result.exit_code == 0
+
+    data = json.loads(result.output)
+
+    assert data["name"] == "RepoBoost"
+    assert data["fail_under"] == 80
+    assert data["python_version"] == "3.12"
+    assert "repoboost scan . --fail-under 80" in data["content"]
+
+
 def create_good_project(tmp_path):
     readme = tmp_path / "README.md"
     readme.write_text(

@@ -1,0 +1,30 @@
+name: RepoBoost
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  repoboost:
+    name: Run RepoBoost
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install RepoBoost
+        run: |
+          python -m pip install --upgrade pip
+          pip install repoboost
+
+      - name: Run RepoBoost scan
+        run: repoboost scan . --fail-under 80

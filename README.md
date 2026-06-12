@@ -23,6 +23,7 @@ It checks whether a project has the basic things visitors expect before they sta
 - Detects project type, languages, frameworks, and tools
 - Recommends project-specific next steps
 - Generates a RepoBoost README badge
+- Generates a GitHub Actions workflow for CI usage
 - Saves scan reports as JSON files
 - Supports JSON output for automation
 - Supports score thresholds for CI usage
@@ -117,6 +118,24 @@ Print badge data as JSON:
 
 ```bash
 repoboost badge . --json
+```
+
+Generate a GitHub Actions workflow:
+
+```bash
+repoboost ci .
+```
+
+Save the workflow to a file:
+
+```bash
+repoboost ci . --output .github/workflows/repoboost.yml
+```
+
+Generate a workflow with a custom required score:
+
+```bash
+repoboost ci . --fail-under 90
 ```
 
 Get JSON output in the terminal:
@@ -225,6 +244,41 @@ low     code-quality    Add pre-commit hooks
 ![RepoBoost](https://img.shields.io/badge/RepoBoost-A%20%7C%20100%25-brightgreen)
 ```
 
+## CI Workflow Example
+
+```yaml
+name: RepoBoost
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  repoboost:
+    name: Run RepoBoost
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install RepoBoost
+        run: |
+          python -m pip install --upgrade pip
+          pip install repoboost
+
+      - name: Run RepoBoost scan
+        run: repoboost scan . --fail-under 80
+```
+
 ## JSON Report Example
 
 ```json
@@ -294,6 +348,12 @@ Generate a README badge:
 repoboost badge .
 ```
 
+Generate a GitHub Actions workflow:
+
+```bash
+repoboost ci .
+```
+
 Save a report file:
 
 ```bash
@@ -310,8 +370,8 @@ repoboost scan . --fail-under 90
 
 - Add automatic README section generation
 - Add smarter GitHub topic suggestions
-- Add GitHub Actions integration
 - Add portfolio-readiness score
+- Publish package to PyPI
 
 ## Contributing
 

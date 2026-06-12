@@ -10,6 +10,7 @@ from rich.table import Table
 
 from repoboost import __version__
 from repoboost.badges import generate_badge
+from repoboost.ci import CIWorkflow, generate_ci_workflow
 from repoboost.project import ProjectProfile, inspect_project
 from repoboost.recommendations import Recommendation, generate_recommendations
 from repoboost.scanner import CheckResult, ScanReport, scan_project
@@ -326,6 +327,64 @@ def badge(
     console.print()
 
 
+@app.command(name="ci")
+def ci_command(
+    path: Path = typer.Argument(
+        Path("."),
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        readable=True,
+        resolve_path=True,
+        help="Path to the repository you want a CI workflow for.",
+    ),
+    output: Path | None = typer.Option(
+        None,
+        "--output",
+        "-o",
+        help="Save the generated workflow to a YAML file.",
+    ),
+    fail_under: int = typer.Option(
+        80,
+        "--fail-under",
+        min=0,
+        max=100,
+        help="Required RepoBoost score for the generated workflow.",
+    ),
+    python_version: str = typer.Option(
+        "3.12",
+        "--python-version",
+        help="Python version to use in the generated workflow.",
+    ),
+    json_output: bool = typer.Option(
+        False,
+        "--json",
+        help="Print CI workflow data as JSON.",
+    ),
+) -> None:
+    """
+    Generate a GitHub Actions workflow for running RepoBoost in CI.
+    """
+    workflow = generate_ci_workflow(
+        fail_under=fail_under,
+        python_version=python_version,
+    )
+
+    if output is not None:
+        _write_text_file(workflow.content, output)
+
+    if json_output:
+        console.print_json(data=workflow.to_dict())
+        return
+
+    _render_ci_workflow(path, workflow)
+
+    if output is not None:
+        console.print(f"[green]Saved workflow to {output}[/green]")
+
+    console.print()
+
+
 def _render_report(report: ScanReport) -> None:
     title = f"RepoBoost Score: {report.score}/{report.max_score} — Grade {report.grade}"
 
@@ -445,6 +504,22 @@ def _render_recommendations(path: Path, recommendations: list[Recommendation]) -
     console.print()
 
 
+def _render_ci_workflow(path: Path, workflow: CIWorkflow) -> None:
+    console.print()
+    console.print(
+        Panel.fit(
+            f"[bold]GitHub Actions workflow[/bold]\n"
+            f"Path: {path.resolve()}\n"
+            f"Required score: {workflow.fail_under}%\n"
+            f"Python: {workflow.python_version}",
+            title="CI",
+            border_style="blue",
+        )
+    )
+
+    console.print(workflow.content)
+
+
 def _format_list(items: list[str]) -> str:
     if not items:
         return "None detected"
@@ -457,6 +532,11 @@ def _write_json_report(report: ScanReport, output_path: Path) -> None:
         json.dumps(report.to_dict(), indent=2, ensure_ascii=False),
         encoding="utf-8",
     )
+
+
+def _write_text_file(content: str, output_path: Path) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(content, encoding="utf-8")
 
 
 def _rank_missing_checks(checks: list[CheckResult]) -> list[CheckResult]:
