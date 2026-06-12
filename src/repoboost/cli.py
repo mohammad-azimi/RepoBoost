@@ -18,7 +18,8 @@ from repoboost.topics import suggest_topics
 
 
 app = typer.Typer(
-    help="RepoBoost audits a repository and suggests practical improvements for better open-source presentation."
+    help="RepoBoost audits a repository and suggests practical improvements for better open-source presentation.",
+    invoke_without_command=True,
 )
 
 console = Console()
@@ -26,15 +27,20 @@ console = Console()
 
 @app.callback()
 def main(
+    ctx: typer.Context,
     version: bool = typer.Option(
         False,
         "--version",
         "-v",
         help="Show RepoBoost version.",
-    )
+    ),
 ) -> None:
     if version:
         console.print(f"RepoBoost {__version__}")
+        raise typer.Exit()
+
+    if ctx.invoked_subcommand is None:
+        console.print(ctx.get_help())
         raise typer.Exit()
 
 

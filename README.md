@@ -40,6 +40,12 @@ python -m venv .venv
 pip install -e ".[dev]"
 ```
 
+After the first package release, RepoBoost will be installable with:
+
+```bash
+pip install repoboost
+```
+
 ## Usage
 
 Scan the current repository:
@@ -292,6 +298,35 @@ jobs:
 }
 ```
 
+## Release preparation
+
+RepoBoost includes a local release checklist:
+
+```bash
+docs/RELEASE.md
+```
+
+Before publishing, validate the package locally:
+
+```bash
+python -m build
+python -m twine check dist/*
+```
+
+To test the generated wheel locally on Windows:
+
+```bash
+pip install --force-reinstall dist\repoboost-0.1.0-py3-none-any.whl
+repoboost --version
+repoboost scan .
+```
+
+Then restore editable development mode:
+
+```bash
+pip install -e ".[dev]"
+```
+
 ## Why RepoBoost?
 
 Many repositories contain useful code, but visitors leave because the project is not presented clearly.
@@ -352,6 +387,13 @@ Generate a GitHub Actions workflow:
 
 ```bash
 repoboost ci .
+```
+
+Build the package locally:
+
+```bash
+python -m build
+python -m twine check dist/*
 ```
 
 Save a report file:
