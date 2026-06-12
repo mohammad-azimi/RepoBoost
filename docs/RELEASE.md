@@ -84,18 +84,46 @@ After testing the wheel, return to editable development mode:
 pip install -e ".[dev]"
 ```
 
-## 8. Publishing notes
+## 8. Publish to TestPyPI first
 
-Do not publish immediately unless all checks pass.
+Before publishing to the real PyPI index, publish to TestPyPI.
+
+Read:
+
+```text
+docs/TESTPYPI.md
+```
+
+Then run the manual GitHub Actions workflow:
+
+```text
+Actions -> Publish to TestPyPI -> Run workflow
+```
+
+## 9. Test installation from TestPyPI
+
+After the TestPyPI workflow succeeds, test installation in a clean environment:
+
+```bash
+pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ repoboost
+repoboost --version
+repoboost scan .
+```
+
+## 10. Publishing notes
+
+Do not publish to the real PyPI index unless all checks pass.
 
 Recommended publishing order:
 
-1. TestPyPI
-2. Real PyPI
-3. GitHub release
-4. LinkedIn/GitHub announcement post
+1. Local build
+2. Local wheel install test
+3. TestPyPI
+4. Real PyPI
+5. GitHub release
+6. LinkedIn/GitHub announcement post
 
-## 9. Version checklist
+## 11. Version checklist
 
 Before publishing a new version:
 
@@ -104,5 +132,9 @@ Before publishing a new version:
 - Run tests
 - Build package
 - Run `twine check`
+- Test local wheel installation
+- Publish to TestPyPI
+- Test TestPyPI installation
 - Create a Git tag
-- Publish release
+- Publish to real PyPI
+- Create a GitHub release
