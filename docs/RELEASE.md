@@ -110,7 +110,45 @@ repoboost --version
 repoboost scan .
 ```
 
-## 10. Publishing notes
+Expected result:
+
+```text
+RepoBoost 0.1.0
+```
+
+## 10. Publish to PyPI
+
+Only publish to PyPI after TestPyPI works correctly.
+
+Read:
+
+```text
+docs/PYPI.md
+```
+
+Then run the manual GitHub Actions workflow:
+
+```text
+Actions -> Publish to PyPI -> Run workflow
+```
+
+## 11. Test installation from PyPI
+
+After the PyPI workflow succeeds, test installation in a clean environment:
+
+```bash
+pip install repoboost
+repoboost --version
+repoboost scan .
+```
+
+Expected result:
+
+```text
+RepoBoost 0.1.0
+```
+
+## 12. Publishing notes
 
 Do not publish to the real PyPI index unless all checks pass.
 
@@ -119,11 +157,13 @@ Recommended publishing order:
 1. Local build
 2. Local wheel install test
 3. TestPyPI
-4. Real PyPI
-5. GitHub release
-6. LinkedIn/GitHub announcement post
+4. TestPyPI installation test
+5. Real PyPI
+6. PyPI installation test
+7. GitHub release
+8. LinkedIn/GitHub announcement post
 
-## 11. Version checklist
+## 13. Version checklist
 
 Before publishing a new version:
 
@@ -137,4 +177,5 @@ Before publishing a new version:
 - Test TestPyPI installation
 - Create a Git tag
 - Publish to real PyPI
+- Test PyPI installation
 - Create a GitHub release
