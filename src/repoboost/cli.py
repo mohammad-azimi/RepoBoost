@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import typer
@@ -8,7 +9,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 from repoboost import __version__
-from repoboost.scanner import CheckResult, scan_project
+from repoboost.scanner import CheckResult, ScanReport, scan_project
 
 
 app = typer.Typer(
@@ -48,6 +49,12 @@ def scan(
         "--json",
         help="Print the report as JSON.",
     ),
+    output: Path | None = typer.Option(
+        None,
+        "--output",
+        "-o",
+        help="Save the scan report to a JSON file.",
+    ),
     fail_under: int | None = typer.Option(
         None,
         "--fail-under",
@@ -61,10 +68,16 @@ def scan(
     """
     report = scan_project(path)
 
+    if output is not None:
+        _write_json_report(report, output)
+
     if json_output:
         console.print_json(data=report.to_dict())
     else:
         _render_report(report)
+
+        if output is not None:
+            console.print(f"[green]Saved report to {output}[/green]")
 
     if fail_under is not None and report.percentage < fail_under:
         console.print(
@@ -128,7 +141,7 @@ def doctor(
     console.print()
 
 
-def _render_report(report) -> None:
+def _render_report(report: ScanReport) -> None:
     title = f"RepoBoost Score: {report.score}/{report.max_score} — Grade {report.grade}"
 
     if report.percentage == 100:
@@ -178,6 +191,14 @@ def _render_report(report) -> None:
         console.print("[bold green]Excellent. No missing checks found.[/bold green]")
 
     console.print()
+
+
+def _write_json_report(report: ScanReport, output_path: Path) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(
+        json.dumps(report.to_dict(), indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
 
 
 def _rank_missing_checks(checks: list[CheckResult]) -> list[CheckResult]:

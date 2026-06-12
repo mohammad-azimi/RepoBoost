@@ -18,6 +18,7 @@ It checks whether a project has the basic things visitors expect before they sta
 - Detects screenshots, badges, and demo links
 - Gives practical next-step suggestions
 - Shows top improvement priorities with doctor mode
+- Saves scan reports as JSON files
 - Supports JSON output for automation
 - Supports score thresholds for CI usage
 
@@ -59,10 +60,22 @@ Show more improvement priorities:
 repoboost doctor . --limit 5
 ```
 
-Get JSON output:
+Get JSON output in the terminal:
 
 ```bash
 repoboost scan . --json
+```
+
+Save the scan report to a JSON file:
+
+```bash
+repoboost scan . --output repoboost-report.json
+```
+
+Print JSON and save the same report to a file:
+
+```bash
+repoboost scan . --json --output repoboost-report.json
 ```
 
 Fail if the repository score is below a required threshold:
@@ -110,6 +123,19 @@ Top improvement priorities:
    Fix: Add a LICENSE file so other developers know how they can use the project.
 ```
 
+## JSON Report Example
+
+```json
+{
+  "path": "G:\\Projects\\RepoBoost",
+  "score": 100,
+  "max_score": 100,
+  "percentage": 100.0,
+  "grade": "A",
+  "checks": []
+}
+```
+
 ## Why RepoBoost?
 
 Many repositories contain useful code, but visitors leave because the project is not presented clearly.
@@ -142,6 +168,12 @@ Run doctor mode:
 repoboost doctor .
 ```
 
+Save a report file:
+
+```bash
+repoboost scan . --output repoboost-report.json
+```
+
 Run RepoBoost with a required score threshold:
 
 ```bash
@@ -163,4 +195,4 @@ Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before
 
 ## License
 
-MIT
+MIT 

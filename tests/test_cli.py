@@ -1,3 +1,5 @@
+import json
+
 from typer.testing import CliRunner
 
 from repoboost.cli import app
@@ -26,6 +28,46 @@ def test_cli_scan_passes_with_good_project(tmp_path):
 
     assert result.exit_code == 0
     assert "RepoBoost Score" in result.output
+
+
+def test_cli_scan_saves_json_report(tmp_path):
+    create_good_project(tmp_path)
+    output_file = tmp_path / "repoboost-report.json"
+
+    result = runner.invoke(
+        app,
+        ["scan", str(tmp_path), "--output", str(output_file)],
+    )
+
+    assert result.exit_code == 0
+    assert output_file.exists()
+    assert "Saved report" in result.output
+
+    report_data = json.loads(output_file.read_text(encoding="utf-8"))
+
+    assert report_data["score"] == 100
+    assert report_data["max_score"] == 100
+    assert report_data["grade"] == "A"
+    assert report_data["percentage"] == 100.0
+
+
+def test_cli_scan_prints_json_and_saves_report(tmp_path):
+    create_good_project(tmp_path)
+    output_file = tmp_path / "report.json"
+
+    result = runner.invoke(
+        app,
+        ["scan", str(tmp_path), "--json", "--output", str(output_file)],
+    )
+
+    assert result.exit_code == 0
+    assert output_file.exists()
+
+    printed_data = json.loads(result.output)
+    saved_data = json.loads(output_file.read_text(encoding="utf-8"))
+
+    assert printed_data["score"] == saved_data["score"]
+    assert printed_data["grade"] == saved_data["grade"]
 
 
 def test_cli_doctor_shows_top_improvements_for_empty_project(tmp_path):
