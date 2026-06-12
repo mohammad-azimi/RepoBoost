@@ -126,6 +126,38 @@ def test_cli_topics_prints_json(tmp_path):
     assert "github" in topics
 
 
+def test_cli_inspect_shows_project_profile(tmp_path):
+    create_topic_project(tmp_path)
+
+    result = runner.invoke(
+        app,
+        ["inspect", str(tmp_path)],
+    )
+
+    assert result.exit_code == 0
+    assert "Project inspection" in result.output
+    assert "Languages" in result.output
+    assert "python" in result.output
+
+
+def test_cli_inspect_prints_json(tmp_path):
+    create_topic_project(tmp_path)
+
+    result = runner.invoke(
+        app,
+        ["inspect", str(tmp_path), "--json"],
+    )
+
+    assert result.exit_code == 0
+
+    data = json.loads(result.output)
+
+    assert "python" in data["languages"]
+    assert "cli" in data["project_types"]
+    assert data["important_files"]["readme"] is True
+    assert data["important_files"]["pyproject"] is True
+
+
 def create_good_project(tmp_path):
     readme = tmp_path / "README.md"
     readme.write_text(
@@ -194,6 +226,7 @@ def create_topic_project(tmp_path):
 # RepoBoost
 
 RepoBoost is a CLI developer tool for GitHub repository audit and README quality checks.
+It uses Typer, Rich, and Pytest.
 """,
         encoding="utf-8",
     )
@@ -205,7 +238,8 @@ RepoBoost is a CLI developer tool for GitHub repository audit and README quality
 name = "repoboost"
 dependencies = [
     "typer",
-    "rich"
+    "rich",
+    "pytest"
 ]
 """,
         encoding="utf-8",

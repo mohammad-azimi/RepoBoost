@@ -19,6 +19,7 @@ It checks whether a project has the basic things visitors expect before they sta
 - Gives practical next-step suggestions
 - Shows top improvement priorities with doctor mode
 - Suggests useful GitHub topics
+- Detects project type, languages, frameworks, and tools
 - Saves scan reports as JSON files
 - Supports JSON output for automation
 - Supports score thresholds for CI usage
@@ -77,6 +78,18 @@ Print topic suggestions as JSON:
 
 ```bash
 repoboost topics . --json
+```
+
+Inspect project type, languages, frameworks, and tools:
+
+```bash
+repoboost inspect .
+```
+
+Print project inspection as JSON:
+
+```bash
+repoboost inspect . --json
 ```
 
 Get JSON output in the terminal:
@@ -156,6 +169,18 @@ repository-audit
 documentation
 ```
 
+## Inspect Example
+
+```text
+Project inspection
+
+Project types: cli, developer-tool, repository-tool
+Languages: python
+Package managers: pip
+Frameworks: typer, rich, pytest
+Tools: github-actions, pytest
+```
+
 ## JSON Report Example
 
 ```json
@@ -207,6 +232,12 @@ Suggest GitHub topics:
 repoboost topics .
 ```
 
+Inspect project profile:
+
+```bash
+repoboost inspect .
+```
+
 Save a report file:
 
 ```bash
@@ -222,8 +253,8 @@ repoboost scan . --fail-under 90
 ## Roadmap
 
 - Add automatic README section generation
-- Add GitHub topic suggestions
-- Add project type detection
+- Add smarter GitHub topic suggestions
+- Add project type specific recommendations
 - Add repository badge generation
 - Add GitHub Actions integration
 - Add portfolio-readiness score

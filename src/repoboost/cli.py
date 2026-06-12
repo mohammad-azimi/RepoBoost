@@ -9,6 +9,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 from repoboost import __version__
+from repoboost.project import ProjectProfile, inspect_project
 from repoboost.scanner import CheckResult, ScanReport, scan_project
 from repoboost.topics import suggest_topics
 
@@ -211,6 +212,35 @@ def topics(
     console.print()
 
 
+@app.command(name="inspect")
+def inspect_command(
+    path: Path = typer.Argument(
+        Path("."),
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        readable=True,
+        resolve_path=True,
+        help="Path to the repository you want to inspect.",
+    ),
+    json_output: bool = typer.Option(
+        False,
+        "--json",
+        help="Print project profile as JSON.",
+    ),
+) -> None:
+    """
+    Detect project type, languages, tools, frameworks, and important files.
+    """
+    profile = inspect_project(path)
+
+    if json_output:
+        console.print_json(data=profile.to_dict())
+        return
+
+    _render_project_profile(profile)
+
+
 def _render_report(report: ScanReport) -> None:
     title = f"RepoBoost Score: {report.score}/{report.max_score} — Grade {report.grade}"
 
@@ -261,6 +291,46 @@ def _render_report(report: ScanReport) -> None:
         console.print("[bold green]Excellent. No missing checks found.[/bold green]")
 
     console.print()
+
+
+def _render_project_profile(profile: ProjectProfile) -> None:
+    console.print()
+    console.print(
+        Panel.fit(
+            f"[bold]Project inspection[/bold]\nPath: {profile.path}",
+            title="Inspect",
+            border_style="blue",
+        )
+    )
+
+    table = Table(title="Detected project profile")
+    table.add_column("Category")
+    table.add_column("Detected values")
+
+    table.add_row("Project types", _format_list(profile.project_types))
+    table.add_row("Languages", _format_list(profile.languages))
+    table.add_row("Package managers", _format_list(profile.package_managers))
+    table.add_row("Frameworks", _format_list(profile.frameworks))
+    table.add_row("Tools", _format_list(profile.tools))
+
+    console.print(table)
+
+    files_table = Table(title="Important files")
+    files_table.add_column("File group")
+    files_table.add_column("Status")
+
+    for name, exists in profile.important_files.items():
+        status = "[green]Found[/green]" if exists else "[red]Missing[/red]"
+        files_table.add_row(name, status)
+
+    console.print(files_table)
+    console.print()
+
+
+def _format_list(items: list[str]) -> str:
+    if not items:
+        return "None detected"
+    return ", ".join(items)
 
 
 def _write_json_report(report: ScanReport, output_path: Path) -> None:
