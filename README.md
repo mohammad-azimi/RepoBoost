@@ -1,8 +1,14 @@
 # RepoBoost
 
+![CI](https://github.com/mohammad-azimi/RepoBoost/actions/workflows/ci.yml/badge.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
+
 RepoBoost is a command-line tool that audits a GitHub repository and suggests practical improvements for better open-source presentation.
 
 It checks whether a project has the basic things visitors expect before they star, use, or contribute to a repository.
+
+![RepoBoost demo](docs/repoboost-demo.svg)
 
 ## Features
 
@@ -50,14 +56,15 @@ repoboost scan . --json
 ```text
 RepoBoost Score: 72/100 — Grade C
 
-MISS  License              0/12   No license file found.
-PASS  README               18/18  Found README.md.
 MISS  Screenshots or media 0/10   No screenshots or visual media detected.
+MISS  Badges               0/6    No README badges detected.
+MISS  Contributing guide   0/6    No contributing guide found.
+MISS  CI workflow          0/6    No GitHub Actions workflow detected.
 
 Next best improvements:
-1. Add a LICENSE file so other developers know how they can use the project.
-2. Add a screenshot, GIF, or demo image to make the repository easier to understand quickly.
-3. Add a simple CI workflow that installs dependencies and runs tests.
+1. Add a screenshot, GIF, or demo image to make the repository easier to understand quickly.
+2. Add small badges for license, tests, or package version after the project title.
+3. Add CONTRIBUTING.md if you want other developers to contribute.
 ```
 
 ## Why RepoBoost?
@@ -65,6 +72,26 @@ Next best improvements:
 Many repositories contain useful code, but visitors leave because the project is not presented clearly.
 
 RepoBoost helps developers improve the first impression of their repositories by checking the details that make a project easier to trust, understand, and share.
+
+## Development
+
+Install the project in editable mode:
+
+```bash
+pip install -e ".[dev]"
+```
+
+Run the test suite:
+
+```bash
+pytest
+```
+
+Run RepoBoost on itself:
+
+```bash
+repoboost scan .
+```
 
 ## Roadmap
 
@@ -74,6 +101,10 @@ RepoBoost helps developers improve the first impression of their repositories by
 - Add repository badge generation
 - Add GitHub Actions integration
 - Add portfolio-readiness score
+
+## Contributing
+
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 
 ## License
 
