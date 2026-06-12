@@ -20,6 +20,7 @@ It checks whether a project has the basic things visitors expect before they sta
 - Shows top improvement priorities with doctor mode
 - Suggests useful GitHub topics
 - Detects project type, languages, frameworks, and tools
+- Recommends project-specific next steps
 - Saves scan reports as JSON files
 - Supports JSON output for automation
 - Supports score thresholds for CI usage
@@ -90,6 +91,18 @@ Print project inspection as JSON:
 
 ```bash
 repoboost inspect . --json
+```
+
+Get project-specific recommendations:
+
+```bash
+repoboost recommend .
+```
+
+Print recommendations as JSON:
+
+```bash
+repoboost recommend . --json
 ```
 
 Get JSON output in the terminal:
@@ -181,6 +194,17 @@ Frameworks: typer, rich, pytest
 Tools: github-actions, pytest
 ```
 
+## Recommendations Example
+
+```text
+Recommended next steps
+
+high    distribution    Publish the CLI package to PyPI
+medium  code-quality    Add Ruff linting
+medium  automation      Add a GitHub Actions usage example
+low     code-quality    Add pre-commit hooks
+```
+
 ## JSON Report Example
 
 ```json
@@ -238,6 +262,12 @@ Inspect project profile:
 repoboost inspect .
 ```
 
+Get project recommendations:
+
+```bash
+repoboost recommend .
+```
+
 Save a report file:
 
 ```bash
@@ -254,7 +284,6 @@ repoboost scan . --fail-under 90
 
 - Add automatic README section generation
 - Add smarter GitHub topic suggestions
-- Add project type specific recommendations
 - Add repository badge generation
 - Add GitHub Actions integration
 - Add portfolio-readiness score

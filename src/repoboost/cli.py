@@ -10,6 +10,7 @@ from rich.table import Table
 
 from repoboost import __version__
 from repoboost.project import ProjectProfile, inspect_project
+from repoboost.recommendations import Recommendation, generate_recommendations
 from repoboost.scanner import CheckResult, ScanReport, scan_project
 from repoboost.topics import suggest_topics
 
@@ -241,6 +242,51 @@ def inspect_command(
     _render_project_profile(profile)
 
 
+@app.command()
+def recommend(
+    path: Path = typer.Argument(
+        Path("."),
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        readable=True,
+        resolve_path=True,
+        help="Path to the repository you want recommendations for.",
+    ),
+    limit: int = typer.Option(
+        8,
+        "--limit",
+        "-n",
+        min=1,
+        max=20,
+        help="Maximum number of recommendations to show.",
+    ),
+    json_output: bool = typer.Option(
+        False,
+        "--json",
+        help="Print recommendations as JSON.",
+    ),
+) -> None:
+    """
+    Recommend practical next steps based on repository checks and detected project type.
+    """
+    recommendations = generate_recommendations(path, limit=limit)
+
+    if json_output:
+        console.print_json(
+            data={
+                "path": str(path.resolve()),
+                "recommendations": [
+                    recommendation.to_dict()
+                    for recommendation in recommendations
+                ],
+            }
+        )
+        return
+
+    _render_recommendations(path, recommendations)
+
+
 def _render_report(report: ScanReport) -> None:
     title = f"RepoBoost Score: {report.score}/{report.max_score} — Grade {report.grade}"
 
@@ -324,6 +370,39 @@ def _render_project_profile(profile: ProjectProfile) -> None:
         files_table.add_row(name, status)
 
     console.print(files_table)
+    console.print()
+
+
+def _render_recommendations(path: Path, recommendations: list[Recommendation]) -> None:
+    console.print()
+    console.print(
+        Panel.fit(
+            f"[bold]RepoBoost recommendations[/bold]\nPath: {path.resolve()}",
+            title="Recommend",
+            border_style="blue",
+        )
+    )
+
+    if not recommendations:
+        console.print("[bold green]No recommendations found. This repository looks strong.[/bold green]")
+        console.print()
+        return
+
+    table = Table(title="Recommended next steps")
+    table.add_column("Priority")
+    table.add_column("Category")
+    table.add_column("Recommendation")
+    table.add_column("Action")
+
+    for recommendation in recommendations:
+        table.add_row(
+            recommendation.priority,
+            recommendation.category,
+            recommendation.title,
+            recommendation.action,
+        )
+
+    console.print(table)
     console.print()
 
 

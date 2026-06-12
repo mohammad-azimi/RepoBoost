@@ -158,6 +158,41 @@ def test_cli_inspect_prints_json(tmp_path):
     assert data["important_files"]["pyproject"] is True
 
 
+def test_cli_recommend_shows_recommendations(tmp_path):
+    create_topic_project(tmp_path)
+
+    result = runner.invoke(
+        app,
+        ["recommend", str(tmp_path)],
+    )
+
+    assert result.exit_code == 0
+    assert "RepoBoost recommendations" in result.output
+    assert "Recommended next steps" in result.output
+    assert "Priority" in result.output
+    assert "Category" in result.output
+    assert "Recommendation" in result.output
+
+
+def test_cli_recommend_prints_json(tmp_path):
+    create_topic_project(tmp_path)
+
+    result = runner.invoke(
+        app,
+        ["recommend", str(tmp_path), "--json"],
+    )
+
+    assert result.exit_code == 0
+
+    data = json.loads(result.output)
+    titles = [
+        recommendation["title"]
+        for recommendation in data["recommendations"]
+    ]
+
+    assert "Publish the CLI package to PyPI" in titles
+
+
 def create_good_project(tmp_path):
     readme = tmp_path / "README.md"
     readme.write_text(
