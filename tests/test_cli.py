@@ -17,6 +17,42 @@ def test_cli_scan_fails_below_threshold(tmp_path):
 
 
 def test_cli_scan_passes_with_good_project(tmp_path):
+    create_good_project(tmp_path)
+
+    result = runner.invoke(
+        app,
+        ["scan", str(tmp_path), "--fail-under", "90"],
+    )
+
+    assert result.exit_code == 0
+    assert "RepoBoost Score" in result.output
+
+
+def test_cli_doctor_shows_top_improvements_for_empty_project(tmp_path):
+    result = runner.invoke(
+        app,
+        ["doctor", str(tmp_path)],
+    )
+
+    assert result.exit_code == 0
+    assert "RepoBoost Doctor" in result.output
+    assert "Top improvement priorities" in result.output
+    assert "README" in result.output
+
+
+def test_cli_doctor_reports_ready_project(tmp_path):
+    create_good_project(tmp_path)
+
+    result = runner.invoke(
+        app,
+        ["doctor", str(tmp_path)],
+    )
+
+    assert result.exit_code == 0
+    assert "No missing improvements found" in result.output
+
+
+def create_good_project(tmp_path):
     readme = tmp_path / "README.md"
     readme.write_text(
         """
@@ -75,11 +111,3 @@ Live demo: https://example.com
     assets_dir.mkdir()
     screenshot_file = assets_dir / "screenshot.png"
     screenshot_file.write_bytes(b"fake image content")
-
-    result = runner.invoke(
-        app,
-        ["scan", str(tmp_path), "--fail-under", "90"],
-    )
-
-    assert result.exit_code == 0
-    assert "RepoBoost Score" in result.output

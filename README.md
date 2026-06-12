@@ -17,6 +17,7 @@ It checks whether a project has the basic things visitors expect before they sta
 - Detects installation and usage sections
 - Detects screenshots, badges, and demo links
 - Gives practical next-step suggestions
+- Shows top improvement priorities with doctor mode
 - Supports JSON output for automation
 - Supports score thresholds for CI usage
 
@@ -44,6 +45,18 @@ Scan another local repository:
 
 ```bash
 repoboost scan path/to/project
+```
+
+Show only the most important improvement priorities:
+
+```bash
+repoboost doctor .
+```
+
+Show more improvement priorities:
+
+```bash
+repoboost doctor . --limit 5
 ```
 
 Get JSON output:
@@ -76,6 +89,27 @@ Next best improvements:
 3. Add CONTRIBUTING.md if you want other developers to contribute.
 ```
 
+## Doctor Mode Example
+
+```text
+RepoBoost Doctor
+Score: 54/100 — Grade D
+
+Top improvement priorities:
+
+1. README
+   Status: Missing
+   Impact: 18 points
+   Problem: No README file found.
+   Fix: Add a README.md with a short pitch, features, installation, usage, screenshots, and roadmap.
+
+2. License
+   Status: Missing
+   Impact: 12 points
+   Problem: No license file found.
+   Fix: Add a LICENSE file so other developers know how they can use the project.
+```
+
 ## Why RepoBoost?
 
 Many repositories contain useful code, but visitors leave because the project is not presented clearly.
@@ -100,6 +134,12 @@ Run RepoBoost on itself:
 
 ```bash
 repoboost scan .
+```
+
+Run doctor mode:
+
+```bash
+repoboost doctor .
 ```
 
 Run RepoBoost with a required score threshold:

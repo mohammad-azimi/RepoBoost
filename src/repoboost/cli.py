@@ -8,7 +8,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 from repoboost import __version__
-from repoboost.scanner import scan_project
+from repoboost.scanner import CheckResult, scan_project
 
 
 app = typer.Typer(
@@ -57,7 +57,7 @@ def scan(
     ),
 ) -> None:
     """
-    Scan a repository and print a RepoBoost score.
+    Scan a repository and print a full RepoBoost score report.
     """
     report = scan_project(path)
 
@@ -71,6 +71,61 @@ def scan(
             f"[bold red]RepoBoost score {report.percentage}% is below the required threshold of {fail_under}%.[/bold red]"
         )
         raise typer.Exit(code=1)
+
+
+@app.command()
+def doctor(
+    path: Path = typer.Argument(
+        Path("."),
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        readable=True,
+        resolve_path=True,
+        help="Path to the repository you want to inspect.",
+    ),
+    limit: int = typer.Option(
+        3,
+        "--limit",
+        "-n",
+        min=1,
+        max=10,
+        help="Number of improvement priorities to show.",
+    ),
+) -> None:
+    """
+    Show the most important improvement priorities for a repository.
+    """
+    report = scan_project(path)
+    missing_checks = _rank_missing_checks(report.checks)
+
+    console.print()
+    console.print(
+        Panel.fit(
+            f"[bold]RepoBoost Doctor[/bold]\n"
+            f"Score: {report.score}/{report.max_score} — Grade {report.grade}\n"
+            f"Path: {report.path}",
+            title="Doctor",
+            border_style="blue",
+        )
+    )
+
+    if not missing_checks:
+        console.print("[bold green]No missing improvements found. This repository looks ready to share.[/bold green]")
+        console.print()
+        return
+
+    console.print("[bold]Top improvement priorities:[/bold]")
+
+    for index, check in enumerate(missing_checks[:limit], start=1):
+        console.print()
+        console.print(f"[bold]{index}. {check.name}[/bold]")
+        console.print(f"   Status: [red]Missing[/red]")
+        console.print(f"   Impact: {check.max_score} points")
+        console.print(f"   Problem: {check.message}")
+        console.print(f"   Fix: {check.suggestion}")
+
+    console.print()
 
 
 def _render_report(report) -> None:
@@ -123,6 +178,27 @@ def _render_report(report) -> None:
         console.print("[bold green]Excellent. No missing checks found.[/bold green]")
 
     console.print()
+
+
+def _rank_missing_checks(checks: list[CheckResult]) -> list[CheckResult]:
+    severity_weight = {
+        "high": 3,
+        "medium": 2,
+        "low": 1,
+        "info": 0,
+    }
+
+    missing_checks = [check for check in checks if not check.passed]
+
+    return sorted(
+        missing_checks,
+        key=lambda check: (
+            severity_weight.get(check.severity, 0),
+            check.max_score,
+            check.name,
+        ),
+        reverse=True,
+    )
 
 
 if __name__ == "__main__":
