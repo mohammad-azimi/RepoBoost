@@ -10,6 +10,7 @@ from rich.table import Table
 
 from repoboost import __version__
 from repoboost.scanner import CheckResult, ScanReport, scan_project
+from repoboost.topics import suggest_topics
 
 
 app = typer.Typer(
@@ -138,6 +139,75 @@ def doctor(
         console.print(f"   Problem: {check.message}")
         console.print(f"   Fix: {check.suggestion}")
 
+    console.print()
+
+
+@app.command()
+def topics(
+    path: Path = typer.Argument(
+        Path("."),
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        readable=True,
+        resolve_path=True,
+        help="Path to the repository you want topic suggestions for.",
+    ),
+    limit: int = typer.Option(
+        10,
+        "--limit",
+        "-n",
+        min=1,
+        max=20,
+        help="Maximum number of topic suggestions to show.",
+    ),
+    json_output: bool = typer.Option(
+        False,
+        "--json",
+        help="Print topic suggestions as JSON.",
+    ),
+) -> None:
+    """
+    Suggest useful GitHub topics for a repository.
+    """
+    suggestions = suggest_topics(path)[:limit]
+
+    if json_output:
+        console.print_json(
+            data={
+                "path": str(path.resolve()),
+                "topics": [suggestion.to_dict() for suggestion in suggestions],
+            }
+        )
+        return
+
+    console.print()
+    console.print(
+        Panel.fit(
+            f"[bold]GitHub topic suggestions[/bold]\nPath: {path.resolve()}",
+            title="Topics",
+            border_style="blue",
+        )
+    )
+
+    if not suggestions:
+        console.print("[yellow]No topic suggestions found.[/yellow]")
+        console.print()
+        return
+
+    table = Table(title="Suggested GitHub topics")
+    table.add_column("Topic")
+    table.add_column("Reason")
+
+    for suggestion in suggestions:
+        table.add_row(suggestion.topic, suggestion.reason)
+
+    console.print(table)
+    console.print()
+
+    topic_line = ", ".join(suggestion.topic for suggestion in suggestions)
+    console.print("[bold]Copyable topic list:[/bold]")
+    console.print(topic_line)
     console.print()
 
 

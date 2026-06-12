@@ -18,6 +18,7 @@ It checks whether a project has the basic things visitors expect before they sta
 - Detects screenshots, badges, and demo links
 - Gives practical next-step suggestions
 - Shows top improvement priorities with doctor mode
+- Suggests useful GitHub topics
 - Saves scan reports as JSON files
 - Supports JSON output for automation
 - Supports score thresholds for CI usage
@@ -58,6 +59,24 @@ Show more improvement priorities:
 
 ```bash
 repoboost doctor . --limit 5
+```
+
+Suggest GitHub topics:
+
+```bash
+repoboost topics .
+```
+
+Show more topic suggestions:
+
+```bash
+repoboost topics . --limit 15
+```
+
+Print topic suggestions as JSON:
+
+```bash
+repoboost topics . --json
 ```
 
 Get JSON output in the terminal:
@@ -123,6 +142,20 @@ Top improvement priorities:
    Fix: Add a LICENSE file so other developers know how they can use the project.
 ```
 
+## Topics Example
+
+```text
+Suggested GitHub topics
+
+python
+cli
+developer-tools
+github
+open-source
+repository-audit
+documentation
+```
+
 ## JSON Report Example
 
 ```json
@@ -168,6 +201,12 @@ Run doctor mode:
 repoboost doctor .
 ```
 
+Suggest GitHub topics:
+
+```bash
+repoboost topics .
+```
+
 Save a report file:
 
 ```bash
@@ -195,4 +234,4 @@ Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before
 
 ## License
 
-MIT 
+MIT

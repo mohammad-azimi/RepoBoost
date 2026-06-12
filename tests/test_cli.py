@@ -94,6 +94,38 @@ def test_cli_doctor_reports_ready_project(tmp_path):
     assert "No missing improvements found" in result.output
 
 
+def test_cli_topics_shows_suggestions(tmp_path):
+    create_topic_project(tmp_path)
+
+    result = runner.invoke(
+        app,
+        ["topics", str(tmp_path)],
+    )
+
+    assert result.exit_code == 0
+    assert "GitHub topic suggestions" in result.output
+    assert "python" in result.output
+    assert "cli" in result.output
+
+
+def test_cli_topics_prints_json(tmp_path):
+    create_topic_project(tmp_path)
+
+    result = runner.invoke(
+        app,
+        ["topics", str(tmp_path), "--json"],
+    )
+
+    assert result.exit_code == 0
+
+    data = json.loads(result.output)
+    topics = [item["topic"] for item in data["topics"]]
+
+    assert "python" in topics
+    assert "cli" in topics
+    assert "github" in topics
+
+
 def create_good_project(tmp_path):
     readme = tmp_path / "README.md"
     readme.write_text(
@@ -153,3 +185,28 @@ Live demo: https://example.com
     assets_dir.mkdir()
     screenshot_file = assets_dir / "screenshot.png"
     screenshot_file.write_bytes(b"fake image content")
+
+
+def create_topic_project(tmp_path):
+    readme = tmp_path / "README.md"
+    readme.write_text(
+        """
+# RepoBoost
+
+RepoBoost is a CLI developer tool for GitHub repository audit and README quality checks.
+""",
+        encoding="utf-8",
+    )
+
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text(
+        """
+[project]
+name = "repoboost"
+dependencies = [
+    "typer",
+    "rich"
+]
+""",
+        encoding="utf-8",
+    )
