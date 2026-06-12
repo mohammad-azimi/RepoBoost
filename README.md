@@ -18,6 +18,7 @@ It checks whether a project has the basic things visitors expect before they sta
 - Detects screenshots, badges, and demo links
 - Gives practical next-step suggestions
 - Supports JSON output for automation
+- Supports score thresholds for CI usage
 
 ## Installation
 
@@ -50,6 +51,14 @@ Get JSON output:
 ```bash
 repoboost scan . --json
 ```
+
+Fail if the repository score is below a required threshold:
+
+```bash
+repoboost scan . --fail-under 80
+```
+
+This is useful for CI pipelines where you want to prevent poorly documented repositories from passing quality checks.
 
 ## Example Output
 
@@ -91,6 +100,12 @@ Run RepoBoost on itself:
 
 ```bash
 repoboost scan .
+```
+
+Run RepoBoost with a required score threshold:
+
+```bash
+repoboost scan . --fail-under 90
 ```
 
 ## Roadmap
