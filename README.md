@@ -1,8 +1,9 @@
 # RepoBoost
 
 ![CI](https://github.com/mohammad-azimi/RepoBoost/actions/workflows/ci.yml/badge.svg)
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![PyPI](https://img.shields.io/pypi/v/repoboost.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![RepoBoost](https://img.shields.io/badge/RepoBoost-A%20%7C%20100%25-brightgreen)
 
 RepoBoost is a command-line tool that audits a GitHub repository and suggests practical improvements for better open-source presentation.
@@ -11,9 +12,30 @@ It checks whether a project has the basic things visitors expect before they sta
 
 ![RepoBoost demo](docs/repoboost-demo.svg)
 
+## Installation
+
+Install RepoBoost from PyPI:
+
+```bash
+pip install repoboost
+```
+
+Check that it works:
+
+```bash
+repoboost --version
+```
+
+Expected output:
+
+```text
+RepoBoost 0.1.0
+```
+
 ## Features
 
 - Scores a repository from 0 to 100
+- Gives a grade from A to F
 - Checks for README, license, .gitignore, tests, and CI
 - Detects installation and usage sections
 - Detects screenshots, badges, and demo links
@@ -27,24 +49,6 @@ It checks whether a project has the basic things visitors expect before they sta
 - Saves scan reports as JSON files
 - Supports JSON output for automation
 - Supports score thresholds for CI usage
-
-## Installation
-
-For local development:
-
-```bash
-git clone https://github.com/mohammad-azimi/RepoBoost.git
-cd RepoBoost
-python -m venv .venv
-.venv\Scripts\activate
-pip install -e ".[dev]"
-```
-
-After the first package release, RepoBoost will be installable with:
-
-```bash
-pip install repoboost
-```
 
 ## Usage
 
@@ -298,35 +302,6 @@ jobs:
 }
 ```
 
-## Release preparation
-
-RepoBoost includes a local release checklist:
-
-```bash
-docs/RELEASE.md
-```
-
-Before publishing, validate the package locally:
-
-```bash
-python -m build
-python -m twine check dist/*
-```
-
-To test the generated wheel locally on Windows:
-
-```bash
-pip install --force-reinstall dist\repoboost-0.1.0-py3-none-any.whl
-repoboost --version
-repoboost scan .
-```
-
-Then restore editable development mode:
-
-```bash
-pip install -e ".[dev]"
-```
-
 ## Why RepoBoost?
 
 Many repositories contain useful code, but visitors leave because the project is not presented clearly.
@@ -334,6 +309,20 @@ Many repositories contain useful code, but visitors leave because the project is
 RepoBoost helps developers improve the first impression of their repositories by checking the details that make a project easier to trust, understand, and share.
 
 ## Development
+
+Clone the repository:
+
+```bash
+git clone https://github.com/mohammad-azimi/RepoBoost.git
+cd RepoBoost
+```
+
+Create and activate a virtual environment:
+
+```bash
+python -m venv .venv
+.venv\Scripts\activate
+```
 
 Install the project in editable mode:
 
@@ -408,12 +397,35 @@ Run RepoBoost with a required score threshold:
 repoboost scan . --fail-under 90
 ```
 
+## Release
+
+RepoBoost is available on PyPI:
+
+```bash
+pip install repoboost
+```
+
+Release notes are available in:
+
+```text
+CHANGELOG.md
+```
+
+Release documentation is available in:
+
+```text
+docs/RELEASE.md
+docs/TESTPYPI.md
+docs/PYPI.md
+```
+
 ## Roadmap
 
 - Add automatic README section generation
 - Add smarter GitHub topic suggestions
 - Add portfolio-readiness score
-- Publish package to PyPI
+- Add more project-type specific recommendations
+- Add configurable scoring rules
 
 ## Contributing
 

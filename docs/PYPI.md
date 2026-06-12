@@ -1,20 +1,31 @@
 # PyPI Publishing Guide
 
-This document explains how to publish RepoBoost to the real PyPI index after testing on TestPyPI.
+RepoBoost is published on PyPI.
 
-Do not publish to PyPI until TestPyPI installation works correctly.
+Install it with:
 
-## 1. Create or log in to a PyPI account
+```bash
+pip install repoboost
+```
 
-PyPI and TestPyPI use separate accounts.
+This document explains how to publish future RepoBoost versions to the real PyPI index.
 
-Use the real PyPI website for this step.
+## 1. Prerequisites
 
-## 2. Configure Trusted Publishing on PyPI
+Before publishing a new version, make sure:
 
-Go to your PyPI account publishing settings and create a pending trusted publisher.
+- The TestPyPI release works
+- Local tests pass
+- Local package build works
+- Package metadata passes `twine check`
+- The version number has been updated
+- The PyPI trusted publisher is configured
 
-Use these values:
+## 2. Trusted Publishing
+
+RepoBoost uses PyPI trusted publishing through GitHub Actions.
+
+The PyPI trusted publisher should use these values:
 
 ```text
 PyPI project name: repoboost
@@ -24,11 +35,24 @@ Workflow name: publish-pypi.yml
 Environment name: leave empty
 ```
 
-In this workflow, no GitHub environment is used. The environment field is optional for PyPI trusted publishing.
+The workflow file is:
+
+```text
+.github/workflows/publish-pypi.yml
+```
+
+The publishing job must include:
+
+```yaml
+permissions:
+  id-token: write
+```
+
+No PyPI token or password should be stored in GitHub secrets for this workflow.
 
 ## 3. Run final local checks
 
-Before publishing to PyPI, run:
+Before publishing a new PyPI version, run:
 
 ```bash
 pytest
@@ -77,9 +101,25 @@ Expected result:
 RepoBoost 0.1.0
 ```
 
-## 6. If the package name is already taken
+## 6. Version update checklist
 
-If PyPI rejects the package name, choose another package name in `pyproject.toml`.
+Before publishing a new version:
+
+- Update `version` in `pyproject.toml`
+- Update `__version__` in `src/repoboost/__init__.py`
+- Update `CHANGELOG.md`
+- Run tests
+- Build package
+- Run `twine check`
+- Publish to TestPyPI
+- Test TestPyPI installation
+- Publish to PyPI
+- Test PyPI installation
+- Create a GitHub release
+
+## 7. If the package name is unavailable
+
+If PyPI rejects the package name in a future setup, choose another package name in `pyproject.toml`.
 
 Possible alternatives:
 
