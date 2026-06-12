@@ -21,10 +21,10 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install RepoBoost
+      - name: Install RepoBoost from source
         run: |
           python -m pip install --upgrade pip
-          pip install repoboost
+          pip install -e ".[dev]"
 
       - name: Run RepoBoost scan
         run: repoboost scan . --fail-under 80
