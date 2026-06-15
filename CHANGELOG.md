@@ -2,6 +2,27 @@
 
 All notable changes to RepoBoost will be documented in this file.
 
+## 0.1.1 - Configurable Scoring and Smarter Recommendations
+
+### Added
+
+- Added `.repoboost.toml` support for project-specific scoring
+- Added `repoboost init-config` command
+- Added custom check weights
+- Added disabled checks support
+- Added scoring profile display in scan reports
+- Added `--config` support for scan, doctor, recommend, and badge commands
+- Added smarter recommendations with score impact information
+- Added configuration-aware recommendations
+- Added tests for configurable scoring
+
+### Changed
+
+- Updated package version to `0.1.1`
+- Improved recommendation wording for Python CLI projects
+- Improved repository recommendations for package distribution and documentation
+- Updated documentation to explain configurable scoring
+
 ## 0.1.0 - Initial PyPI Release
 
 RepoBoost is now available on PyPI.

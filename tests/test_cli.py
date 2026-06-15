@@ -190,7 +190,7 @@ def test_cli_recommend_prints_json(tmp_path):
         for recommendation in data["recommendations"]
     ]
 
-    assert "Publish the CLI package to PyPI" in titles
+    assert "Keep PyPI installation visible near the top" in titles
 
 
 def test_cli_badge_outputs_markdown(tmp_path):

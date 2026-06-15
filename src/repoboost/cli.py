@@ -11,6 +11,7 @@ from rich.table import Table
 from repoboost import __version__
 from repoboost.badges import generate_badge
 from repoboost.ci import CIWorkflow, generate_ci_workflow
+from repoboost.config import generate_config_template
 from repoboost.project import ProjectProfile, inspect_project
 from repoboost.recommendations import Recommendation, generate_recommendations
 from repoboost.scanner import CheckResult, ScanReport, scan_project
@@ -55,6 +56,11 @@ def scan(
         resolve_path=True,
         help="Path to the repository you want to scan.",
     ),
+    config_path: Path | None = typer.Option(
+        None,
+        "--config",
+        help="Path to a custom .repoboost.toml config file.",
+    ),
     json_output: bool = typer.Option(
         False,
         "--json",
@@ -77,7 +83,7 @@ def scan(
     """
     Scan a repository and print a full RepoBoost score report.
     """
-    report = scan_project(path)
+    report = scan_project(path, config_path=config_path)
 
     if output is not None:
         _write_json_report(report, output)
@@ -108,6 +114,11 @@ def doctor(
         resolve_path=True,
         help="Path to the repository you want to inspect.",
     ),
+    config_path: Path | None = typer.Option(
+        None,
+        "--config",
+        help="Path to a custom .repoboost.toml config file.",
+    ),
     limit: int = typer.Option(
         3,
         "--limit",
@@ -120,7 +131,7 @@ def doctor(
     """
     Show the most important improvement priorities for a repository.
     """
-    report = scan_project(path)
+    report = scan_project(path, config_path=config_path)
     missing_checks = _rank_missing_checks(report.checks)
 
     console.print()
@@ -128,6 +139,7 @@ def doctor(
         Panel.fit(
             f"[bold]RepoBoost Doctor[/bold]\n"
             f"Score: {report.score}/{report.max_score} — Grade {report.grade}\n"
+            f"Profile: {report.profile}\n"
             f"Path: {report.path}",
             title="Doctor",
             border_style="blue",
@@ -149,6 +161,60 @@ def doctor(
         console.print(f"   Problem: {check.message}")
         console.print(f"   Fix: {check.suggestion}")
 
+    console.print()
+
+
+@app.command(name="init-config")
+def init_config_command(
+    path: Path = typer.Argument(
+        Path("."),
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        readable=True,
+        resolve_path=True,
+        help="Path to the repository where .repoboost.toml should be created.",
+    ),
+    output: Path | None = typer.Option(
+        None,
+        "--output",
+        "-o",
+        help="Custom output path for the config file.",
+    ),
+    profile: str = typer.Option(
+        "python-cli",
+        "--profile",
+        help="Profile name to write into the generated config file.",
+    ),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        help="Overwrite the config file if it already exists.",
+    ),
+) -> None:
+    """
+    Create a .repoboost.toml file for configurable scoring.
+    """
+    output_path = output if output is not None else path / ".repoboost.toml"
+    output_path = output_path.resolve()
+
+    if output_path.exists() and not force:
+        console.print(
+            f"[bold red]Config file already exists: {output_path}[/bold red]\n"
+            "Use --force to overwrite it."
+        )
+        raise typer.Exit(code=1)
+
+    _write_text_file(generate_config_template(profile=profile), output_path)
+
+    console.print()
+    console.print(
+        Panel.fit(
+            f"[bold]RepoBoost config created[/bold]\nPath: {output_path}",
+            title="Config",
+            border_style="blue",
+        )
+    )
     console.print()
 
 
@@ -261,6 +327,11 @@ def recommend(
         resolve_path=True,
         help="Path to the repository you want recommendations for.",
     ),
+    config_path: Path | None = typer.Option(
+        None,
+        "--config",
+        help="Path to a custom .repoboost.toml config file.",
+    ),
     limit: int = typer.Option(
         8,
         "--limit",
@@ -278,7 +349,11 @@ def recommend(
     """
     Recommend practical next steps based on repository checks and detected project type.
     """
-    recommendations = generate_recommendations(path, limit=limit)
+    recommendations = generate_recommendations(
+        path,
+        limit=limit,
+        config_path=config_path,
+    )
 
     if json_output:
         console.print_json(
@@ -306,6 +381,11 @@ def badge(
         resolve_path=True,
         help="Path to the repository you want a RepoBoost badge for.",
     ),
+    config_path: Path | None = typer.Option(
+        None,
+        "--config",
+        help="Path to a custom .repoboost.toml config file.",
+    ),
     json_output: bool = typer.Option(
         False,
         "--json",
@@ -315,7 +395,7 @@ def badge(
     """
     Generate a Markdown badge based on the repository RepoBoost score.
     """
-    badge_data = generate_badge(path)
+    badge_data = generate_badge(path, config_path=config_path)
 
     if json_output:
         console.print_json(data=badge_data.to_dict())
@@ -403,10 +483,14 @@ def _render_report(report: ScanReport) -> None:
     else:
         summary = "This repository needs important presentation improvements before sharing widely."
 
+    config_line = f"\nProfile: {report.profile}"
+    if report.config_path:
+        config_line += f"\nConfig: {report.config_path}"
+
     console.print()
     console.print(
         Panel.fit(
-            f"[bold]{title}[/bold]\n{summary}\n\nPath: {report.path}",
+            f"[bold]{title}[/bold]\n{summary}\n{config_line}\n\nPath: {report.path}",
             title="RepoBoost",
             border_style="blue",
         )

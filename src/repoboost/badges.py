@@ -25,8 +25,11 @@ class Badge:
         }
 
 
-def generate_badge(path: str | Path) -> Badge:
-    report = scan_project(path)
+def generate_badge(
+    path: str | Path,
+    config_path: str | Path | None = None,
+) -> Badge:
+    report = scan_project(path, config_path=config_path)
 
     label = "RepoBoost"
     message = f"{report.grade} | {int(report.percentage)}%"

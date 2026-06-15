@@ -3,8 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
+from repoboost.config import load_repoboost_config
 from repoboost.project import ProjectProfile, inspect_project
-from repoboost.scanner import CheckResult, ScanReport, scan_project
+from repoboost.scanner import ScanReport, scan_project
 from repoboost.topics import suggest_topics
 
 
@@ -26,7 +27,11 @@ class Recommendation:
         }
 
 
-def generate_recommendations(path: str | Path, limit: int | None = None) -> list[Recommendation]:
+def generate_recommendations(
+    path: str | Path,
+    limit: int | None = None,
+    config_path: str | Path | None = None,
+) -> list[Recommendation]:
     root = Path(path).resolve()
 
     if not root.exists():
@@ -35,7 +40,8 @@ def generate_recommendations(path: str | Path, limit: int | None = None) -> list
     if not root.is_dir():
         raise NotADirectoryError(f"Path is not a directory: {root}")
 
-    report = scan_project(root)
+    config = load_repoboost_config(root, config_path=config_path)
+    report = scan_project(root, config_path=config_path)
     profile = inspect_project(root)
 
     recommendations: list[Recommendation] = []
@@ -43,8 +49,10 @@ def generate_recommendations(path: str | Path, limit: int | None = None) -> list
     recommendations.extend(_recommend_from_scan(report))
     recommendations.extend(_recommend_from_project_profile(profile))
     recommendations.extend(_recommend_topics(root))
+    recommendations.extend(_recommend_config_usage(root, report))
 
     recommendations = _deduplicate_recommendations(recommendations)
+    recommendations = _filter_by_focus(recommendations, config.recommendation_focus)
     recommendations = _sort_recommendations(recommendations)
 
     if limit is not None:
@@ -63,9 +71,9 @@ def _recommend_from_scan(report: ScanReport) -> list[Recommendation]:
         recommendations.append(
             Recommendation(
                 title=f"Fix missing {check.name}",
-                priority=_priority_from_severity(check.severity),
+                priority=_priority_from_check(check.max_score, check.severity),
                 category="presentation",
-                reason=check.message,
+                reason=f"{check.message} This improvement is worth up to {check.max_score} points.",
                 action=check.suggestion,
             )
         )
@@ -79,33 +87,33 @@ def _recommend_from_project_profile(profile: ProjectProfile) -> list[Recommendat
     if "python" in profile.languages and "cli" in profile.project_types:
         recommendations.append(
             Recommendation(
-                title="Publish the CLI package to PyPI",
+                title="Keep PyPI installation visible near the top",
                 priority="high",
                 category="distribution",
-                reason="This looks like a Python command-line tool, so users should be able to install it easily.",
-                action='Prepare the package for release and document installation with "pip install repoboost".',
+                reason="This looks like a Python CLI package, so the fastest install command should be immediately visible.",
+                action='Keep "pip install repoboost" near the top of the README and in release notes.',
             )
         )
 
     if "cli" in profile.project_types:
         recommendations.append(
             Recommendation(
-                title="Add real command examples for common use cases",
+                title="Add more real command examples",
                 priority="medium",
                 category="documentation",
-                reason="CLI tools get adopted faster when users can copy and run useful commands immediately.",
-                action="Add examples for scanning a repository, saving a JSON report, using fail-under, and suggesting topics.",
+                reason="CLI tools are easier to adopt when users can copy practical commands directly.",
+                action="Add examples for scan, doctor, topics, inspect, recommend, badge, ci, JSON output, and custom config usage.",
             )
         )
 
     if "repository-tool" in profile.project_types:
         recommendations.append(
             Recommendation(
-                title="Add a GitHub Actions usage example",
+                title="Add before/after repository examples",
                 priority="medium",
-                category="automation",
-                reason="Repository tools are more useful when they can run automatically in CI pipelines.",
-                action="Add a README section showing how to run RepoBoost inside a GitHub Actions workflow.",
+                category="documentation",
+                reason="Repository audit tools become more convincing when users can see the improvement before and after applying suggestions.",
+                action="Add one small demo repository example with a low score, then show how the score improves after fixes.",
             )
         )
 
@@ -128,17 +136,6 @@ def _recommend_from_project_profile(profile: ProjectProfile) -> list[Recommendat
                 category="code-quality",
                 reason="Pre-commit hooks help keep formatting and checks consistent before every commit.",
                 action="Add a .pre-commit-config.yaml file with useful Python checks.",
-            )
-        )
-
-    if "web" in profile.project_types and not profile.important_files.get("docker", False):
-        recommendations.append(
-            Recommendation(
-                title="Add deployment instructions",
-                priority="medium",
-                category="deployment",
-                reason="Web projects are easier to trust when visitors can find a live demo or deployment guide.",
-                action="Add a short section explaining how to run or deploy the project.",
             )
         )
 
@@ -197,11 +194,69 @@ def _recommend_topics(root: Path) -> list[Recommendation]:
     ]
 
 
-def _priority_from_severity(severity: str) -> str:
-    if severity == "high":
+def _recommend_config_usage(root: Path, report: ScanReport) -> list[Recommendation]:
+    if report.config_path:
+        return [
+            Recommendation(
+                title="Review custom scoring configuration over time",
+                priority="low",
+                category="configuration",
+                reason=f"This repository uses the '{report.profile}' scoring profile from {report.config_path}.",
+                action="Keep the weights aligned with the repository type as the project grows.",
+            )
+        ]
+
+    config_file = root / ".repoboost.toml"
+
+    if config_file.exists():
+        return []
+
+    return [
+        Recommendation(
+            title="Add a RepoBoost config for project-specific scoring",
+            priority="low",
+            category="configuration",
+            reason="Different repository types may need different scoring priorities.",
+            action='Run "repoboost init-config ." and adjust the weights in .repoboost.toml.',
+        )
+    ]
+
+
+def _filter_by_focus(
+    recommendations: list[Recommendation],
+    focus_categories: list[str],
+) -> list[Recommendation]:
+    if not focus_categories:
+        return recommendations
+
+    allowed_categories = {
+        category.strip().lower()
+        for category in focus_categories
+    }
+
+    always_keep_categories = {
+        "presentation",
+        "configuration",
+    }
+
+    filtered: list[Recommendation] = []
+
+    for recommendation in recommendations:
+        category = recommendation.category.strip().lower()
+
+        if category in allowed_categories or category in always_keep_categories:
+            filtered.append(recommendation)
+
+    return filtered
+
+
+def _priority_from_check(max_score: int, severity: str) -> str:
+    if severity == "high" or max_score >= 10:
         return "high"
-    if severity == "medium":
+
+    if severity == "medium" or max_score >= 6:
         return "medium"
+
     return "low"
 
 

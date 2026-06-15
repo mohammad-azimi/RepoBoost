@@ -1,0 +1,24 @@
+profile = "python-cli"
+fail_under = 90
+disabled_checks = []
+
+[weights]
+readme = 18
+license = 12
+gitignore = 8
+installation = 10
+usage = 10
+screenshots = 10
+demo_link = 8
+badges = 6
+contributing = 6
+tests = 6
+ci = 6
+
+[recommendations]
+focus = [
+  "documentation",
+  "automation",
+  "distribution",
+  "code-quality"
+]

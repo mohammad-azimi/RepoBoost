@@ -41,6 +41,6 @@ dependencies = [
 
     titles = [recommendation.title for recommendation in recommendations]
 
-    assert "Publish the CLI package to PyPI" in titles
-    assert "Add real command examples for common use cases" in titles
+    assert "Keep PyPI installation visible near the top" in titles
+    assert "Add more real command examples" in titles
     assert "Add GitHub topics to improve discoverability" in titles
