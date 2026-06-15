@@ -1,7 +1,7 @@
 # RepoBoost
 
 ![CI](https://github.com/mohammad-azimi/RepoBoost/actions/workflows/ci.yml/badge.svg)
-![PyPI](https://img.shields.io/pypi/v/repoboost.svg)
+![PyPI](https://img.shields.io/pypi/v/repoboost?label=PyPI&cacheSeconds=300)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![RepoBoost](https://img.shields.io/badge/RepoBoost-A%20%7C%20100%25-brightgreen)
@@ -348,4 +348,8 @@ Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before
 
 ## License
 
-MIT
+This project is licensed under the MIT License.
+
+You are free to use, modify, and distribute this project, as long as the original license and copyright notice are included.
+
+See the [LICENSE](LICENSE) file for more details.
