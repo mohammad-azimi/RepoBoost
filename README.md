@@ -1,9 +1,9 @@
 # RepoBoost
 
 ![CI](https://github.com/mohammad-azimi/RepoBoost/actions/workflows/ci.yml/badge.svg)
-![PyPI](https://img.shields.io/pypi/v/repoboost?label=PyPI\&cacheSeconds=300)
-![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
+[![PyPI](https://img.shields.io/pypi/v/repoboost?label=PyPI&color=orange&cacheSeconds=300)](https://pypi.org/project/repoboost/)
+![Python](https://img.shields.io/badge/python-3.10%2B-orange.svg)
+![License](https://img.shields.io/badge/license-MIT-orange.svg)
 ![RepoBoost](https://img.shields.io/badge/RepoBoost-A%20%7C%20100%25-brightgreen)
 
 RepoBoost is a Python command-line tool that audits GitHub repositories and suggests practical improvements for better open-source presentation.
