@@ -16,6 +16,7 @@ from repoboost.project import ProjectProfile, inspect_project
 from repoboost.recommendations import Recommendation, generate_recommendations
 from repoboost.scanner import CheckResult, ScanReport, scan_project
 from repoboost.topics import suggest_topics
+from repoboost.reports import MarkdownReport, generate_markdown_report
 
 
 app = typer.Typer(
@@ -369,6 +370,67 @@ def recommend(
 
     _render_recommendations(path, recommendations)
 
+
+@app.command()
+def report(
+    path: Path = typer.Argument(
+        Path("."),
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        readable=True,
+        resolve_path=True,
+        help="Path to the repository you want to generate a Markdown report for.",
+    ),
+    config_path: Path | None = typer.Option(
+        None,
+        "--config",
+        help="Path to a custom .repoboost.toml config file.",
+    ),
+    output: Path | None = typer.Option(
+        None,
+        "--output",
+        "-o",
+        help="Save the Markdown report to a file.",
+    ),
+    include_passed: bool = typer.Option(
+        True,
+        "--include-passed/--missing-only",
+        help="Include passed checks in the Markdown report.",
+    ),
+    recommendation_limit: int = typer.Option(
+        8,
+        "--recommendation-limit",
+        min=1,
+        max=20,
+        help="Maximum number of recommendations to include.",
+    ),
+) -> None:
+    """
+    Generate a Markdown report from the repository audit.
+    """
+    markdown_report = generate_markdown_report(
+        path,
+        config_path=config_path,
+        include_passed=include_passed,
+        recommendation_limit=recommendation_limit,
+    )
+
+    if output is not None:
+        _write_text_file(markdown_report.content, output)
+
+        console.print()
+        console.print(
+            Panel.fit(
+                f"[bold]Markdown report created[/bold]\nPath: {output.resolve()}",
+                title="Report",
+                border_style="blue",
+            )
+        )
+        console.print()
+        return
+
+    console.print(markdown_report.content)
 
 @app.command()
 def badge(
