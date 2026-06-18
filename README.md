@@ -1,16 +1,35 @@
 # RepoBoost
 
 ![CI](https://github.com/mohammad-azimi/RepoBoost/actions/workflows/ci.yml/badge.svg)
-![PyPI](https://img.shields.io/pypi/v/repoboost?label=PyPI&cacheSeconds=300)
+![PyPI](https://img.shields.io/pypi/v/repoboost?label=PyPI\&cacheSeconds=300)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![RepoBoost](https://img.shields.io/badge/RepoBoost-A%20%7C%20100%25-brightgreen)
 
-RepoBoost is a command-line tool that audits a GitHub repository and suggests practical improvements for better open-source presentation.
+RepoBoost is a Python command-line tool that audits GitHub repositories and suggests practical improvements for better open-source presentation.
 
-It checks whether a project has the basic things visitors expect before they star, use, or contribute to a repository.
+It helps developers make their repositories easier to understand, trust, install, and share.
 
 ![RepoBoost demo](docs/repoboost-demo.svg)
+
+## What RepoBoost Checks
+
+RepoBoost looks for the details that make a repository more useful for visitors, recruiters, contributors, and other developers.
+
+It checks for:
+
+* README quality
+* License file
+* `.gitignore`
+* Installation instructions
+* Usage examples
+* Screenshots or visual media
+* Demo or live links
+* README badges
+* Contributing guide
+* Tests
+* GitHub Actions workflow
+* Repository score and grade
 
 ## Installation
 
@@ -20,7 +39,7 @@ Install RepoBoost from PyPI:
 pip install repoboost
 ```
 
-Check that it works:
+Verify the installation:
 
 ```bash
 repoboost --version
@@ -29,31 +48,85 @@ repoboost --version
 Expected output:
 
 ```text
-RepoBoost 0.1.1
+RepoBoost 0.1.2
 ```
 
-## Features
-
-- Scores a repository from 0 to 100
-- Gives a grade from A to F
-- Supports configurable scoring with `.repoboost.toml`
-- Checks for README, license, .gitignore, tests, and CI
-- Detects installation and usage sections
-- Detects screenshots, badges, and demo links
-- Gives practical next-step suggestions
-- Shows top improvement priorities with doctor mode
-- Suggests useful GitHub topics
-- Detects project type, languages, frameworks, and tools
-- Recommends project-specific next steps
-- Generates a RepoBoost README badge
-- Generates a GitHub Actions workflow for CI usage
-- Saves scan reports as JSON files
-- Supports JSON output for automation
-- Supports score thresholds for CI usage
-
-## Usage
+## Quick Start
 
 Scan the current repository:
+
+```bash
+repoboost scan .
+```
+
+Show the most important improvement priorities:
+
+```bash
+repoboost doctor .
+```
+
+Get project-specific recommendations:
+
+```bash
+repoboost recommend .
+```
+
+Generate a Markdown report:
+
+```bash
+repoboost report . --output REPOBOOST_REPORT.md
+```
+
+Create a configurable scoring file:
+
+```bash
+repoboost init-config .
+```
+
+## Example Output
+
+```text
+RepoBoost Score: 72/100 — Grade C
+
+MISS  Screenshots or media 0/10   No screenshots or visual media detected.
+MISS  Badges               0/6    No README badges detected.
+MISS  Contributing guide   0/6    No contributing guide found.
+MISS  CI workflow          0/6    No GitHub Actions workflow detected.
+
+Next best improvements:
+1. Add a screenshot, GIF, or demo image to make the repository easier to understand quickly.
+2. Add small badges for license, tests, or package version after the project title.
+3. Add CONTRIBUTING.md if you want other developers to contribute.
+```
+
+## Main Features
+
+* Scores a repository from 0 to 100
+* Gives a grade from A to F
+* Supports configurable scoring with `.repoboost.toml`
+* Supports custom check weights
+* Supports disabled checks
+* Shows the active scoring profile in scan reports
+* Detects README, license, `.gitignore`, tests, and CI
+* Detects installation and usage sections
+* Detects screenshots, badges, and demo links
+* Gives practical next-step suggestions
+* Shows top improvement priorities with doctor mode
+* Suggests useful GitHub topics
+* Detects project type, languages, frameworks, and tools
+* Recommends project-specific next steps
+* Generates Markdown audit reports
+* Generates a RepoBoost README badge
+* Generates a GitHub Actions workflow for CI usage
+* Saves scan reports as JSON files
+* Supports JSON output for automation
+* Supports score thresholds for CI usage
+
+## Commands
+
+### `scan`
+
+Run a full repository audit:
 
 ```bash
 repoboost scan .
@@ -65,70 +138,155 @@ Scan another local repository:
 repoboost scan path/to/project
 ```
 
-Show only the most important improvement priorities:
+Useful options:
+
+```bash
+repoboost scan . --json
+repoboost scan . --output repoboost-report.json
+repoboost scan . --fail-under 90
+repoboost scan . --config .repoboost.toml
+```
+
+### `doctor`
+
+Show the most important missing improvements:
 
 ```bash
 repoboost doctor .
 ```
 
-Suggest GitHub topics:
+Use a custom config file:
 
 ```bash
-repoboost topics .
+repoboost doctor . --config .repoboost.toml
 ```
 
-Inspect project type, languages, frameworks, and tools:
+### `recommend`
 
-```bash
-repoboost inspect .
-```
-
-Get project-specific recommendations:
+Show project-specific recommendations:
 
 ```bash
 repoboost recommend .
 ```
 
-Generate a README badge:
+Print recommendations as JSON:
 
 ```bash
-repoboost badge .
+repoboost recommend . --json
 ```
 
-Generate a GitHub Actions workflow:
+Use a custom config file:
 
 ```bash
-repoboost ci .
+repoboost recommend . --config .repoboost.toml
 ```
 
-Generate a configuration file:
+### `report`
+
+Generate a Markdown report from the repository audit:
+
+```bash
+repoboost report .
+```
+
+Save the report to a file:
+
+```bash
+repoboost report . --output REPOBOOST_REPORT.md
+```
+
+Show only missing checks in the audit table:
+
+```bash
+repoboost report . --missing-only
+```
+
+Use a custom config file:
+
+```bash
+repoboost report . --config .repoboost.toml
+```
+
+### `init-config`
+
+Create a `.repoboost.toml` file:
 
 ```bash
 repoboost init-config .
 ```
 
-Use a custom configuration file:
+Overwrite an existing config file:
 
 ```bash
-repoboost scan . --config .repoboost.toml
+repoboost init-config . --force
 ```
 
-Get JSON output:
+Create a config file with a custom profile name:
 
 ```bash
-repoboost scan . --json
+repoboost init-config . --profile python-cli
 ```
 
-Save the scan report to a JSON file:
+### `topics`
+
+Suggest useful GitHub topics:
 
 ```bash
-repoboost scan . --output repoboost-report.json
+repoboost topics .
 ```
 
-Fail if the repository score is below a required threshold:
+Print topic suggestions as JSON:
 
 ```bash
-repoboost scan . --fail-under 80
+repoboost topics . --json
+```
+
+### `inspect`
+
+Detect project type, languages, frameworks, tools, and important files:
+
+```bash
+repoboost inspect .
+```
+
+Print the detected project profile as JSON:
+
+```bash
+repoboost inspect . --json
+```
+
+### `badge`
+
+Generate a Markdown badge based on the repository score:
+
+```bash
+repoboost badge .
+```
+
+Example badge output:
+
+```markdown
+![RepoBoost](https://img.shields.io/badge/RepoBoost-A%20%7C%20100%25-brightgreen)
+```
+
+### `ci`
+
+Generate a GitHub Actions workflow for running RepoBoost in CI:
+
+```bash
+repoboost ci .
+```
+
+Save the workflow to a file:
+
+```bash
+repoboost ci . --output .github/workflows/repoboost.yml
+```
+
+Set a required score threshold:
+
+```bash
+repoboost ci . --fail-under 80
 ```
 
 ## Configurable Scoring
@@ -170,106 +328,107 @@ focus = [
 ]
 ```
 
-You can increase or decrease the weight of each check depending on the type of project.
+You can adjust the score weight of each check depending on the type of project.
 
-For example, a Python CLI tool may prioritize installation, usage, tests, and CI. A visual machine learning project may prioritize screenshots, examples, evaluation results, and documentation.
+For example:
 
-## Example Output
+* A Python CLI tool may prioritize installation, usage examples, tests, and CI.
+* A web app may prioritize screenshots, demo links, deployment, and usage instructions.
+* A machine learning project may prioritize results, visual examples, reproducibility, and documentation.
 
-```text
-RepoBoost Score: 72/100 — Grade C
+## Markdown Reports
 
-MISS  Screenshots or media 0/10   No screenshots or visual media detected.
-MISS  Badges               0/6    No README badges detected.
-MISS  Contributing guide   0/6    No contributing guide found.
-MISS  CI workflow          0/6    No GitHub Actions workflow detected.
+RepoBoost can generate a Markdown report from the repository audit.
 
-Next best improvements:
-1. Add a screenshot, GIF, or demo image to make the repository easier to understand quickly.
-2. Add small badges for license, tests, or package version after the project title.
-3. Add CONTRIBUTING.md if you want other developers to contribute.
-```
-
-## Commands
-
-### scan
+Print a report in the terminal:
 
 ```bash
-repoboost scan .
+repoboost report .
 ```
 
-Runs a full repository audit.
+Save a report to a file:
 
-Useful options:
+```bash
+repoboost report . --output REPOBOOST_REPORT.md
+```
+
+Generate a report with only missing checks:
+
+```bash
+repoboost report . --missing-only
+```
+
+A generated report includes:
+
+* repository summary
+* score and grade
+* active scoring profile
+* audit results table
+* recommendation table
+* next-step suggestions
+
+This is useful for:
+
+* project reviews
+* portfolio project tracking
+* repository improvement plans
+* sharing audit results with teammates
+* documenting before-and-after improvements
+
+## JSON Output
+
+RepoBoost supports JSON output for automation and CI workflows.
+
+Example:
 
 ```bash
 repoboost scan . --json
+```
+
+Save the result to a file:
+
+```bash
 repoboost scan . --output repoboost-report.json
-repoboost scan . --fail-under 90
-repoboost scan . --config .repoboost.toml
 ```
 
-### doctor
+This can be useful for:
+
+* CI checks
+* dashboards
+* automated repository audits
+* portfolio project tracking
+
+## CI Usage
+
+RepoBoost can fail a command if the score is below a required threshold:
 
 ```bash
-repoboost doctor .
+repoboost scan . --fail-under 80
 ```
 
-Shows the most important missing improvements.
+This is useful when you want to keep repository presentation quality above a minimum score.
 
-### topics
+You can also generate a GitHub Actions workflow:
 
 ```bash
-repoboost topics .
+repoboost ci . --output .github/workflows/repoboost.yml
 ```
-
-Suggests GitHub topics for the repository.
-
-### inspect
-
-```bash
-repoboost inspect .
-```
-
-Detects project type, languages, frameworks, tools, and important files.
-
-### recommend
-
-```bash
-repoboost recommend .
-```
-
-Shows project-specific recommendations.
-
-### badge
-
-```bash
-repoboost badge .
-```
-
-Generates a Markdown badge for the repository score.
-
-### ci
-
-```bash
-repoboost ci .
-```
-
-Generates a GitHub Actions workflow for running RepoBoost in CI.
-
-### init-config
-
-```bash
-repoboost init-config .
-```
-
-Creates a `.repoboost.toml` file for configurable scoring.
 
 ## Why RepoBoost?
 
-Many repositories contain useful code, but visitors leave because the project is not presented clearly.
+Many repositories contain useful code, but visitors may leave quickly if the project is not presented clearly.
 
-RepoBoost helps developers improve the first impression of their repositories by checking the details that make a project easier to trust, understand, and share.
+A strong repository should answer these questions quickly:
+
+* What does this project do?
+* Who is it for?
+* How do I install it?
+* How do I use it?
+* Can I trust it?
+* Is it maintained?
+* Are there examples, tests, or screenshots?
+
+RepoBoost helps developers improve these details with clear checks and practical suggestions.
 
 ## Development
 
@@ -312,15 +471,62 @@ Run RepoBoost on itself:
 repoboost scan . --fail-under 90
 ```
 
-## Release
-
-RepoBoost is available on PyPI:
+Generate a Markdown report:
 
 ```bash
-pip install repoboost
+repoboost report . --output REPOBOOST_REPORT.md
 ```
 
-Release notes are available in:
+## Release History
+
+### 0.1.2
+
+Markdown report generation.
+
+Added:
+
+* `repoboost report` command
+* Markdown audit report generation
+* `--output` support for saving reports
+* `--missing-only` option for reports
+* recommendation tables inside generated reports
+* next-step suggestions inside generated reports
+* tests for Markdown report generation
+
+### 0.1.1
+
+Configurable scoring and smarter recommendations.
+
+Added:
+
+* `.repoboost.toml` support
+* `repoboost init-config`
+* custom check weights
+* disabled checks
+* scoring profile display
+* `--config` support for scan, doctor, recommend, and badge
+* configuration-aware recommendations
+* tests for configurable scoring
+
+### 0.1.0
+
+Initial PyPI release.
+
+Added:
+
+* repository scoring
+* scan command
+* doctor command
+* topics command
+* inspect command
+* recommend command
+* badge command
+* CI workflow generator
+* JSON output
+* report saving
+* score thresholds
+
+Full release notes are available in:
 
 ```text
 CHANGELOG.md
@@ -336,15 +542,19 @@ docs/PYPI.md
 
 ## Roadmap
 
-- Add automatic README section generation
-- Add smarter GitHub topic suggestions
-- Add portfolio-readiness score
-- Add more project-type specific recommendations
-- Add configurable scoring presets
+* Add automatic README section generation
+* Add configurable scoring presets
+* Add more project-type specific recommendations
+* Add portfolio-readiness score
+* Add Markdown report export
+* Add repository comparison mode
+* Add optional auto-fix helpers for common missing files
 
 ## Contributing
 
-Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
+Contributions are welcome.
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 
 ## License
 
