@@ -237,6 +237,7 @@ def _filter_by_focus(
     always_keep_categories = {
         "presentation",
         "configuration",
+        "discoverability",
     }
 
     filtered: list[Recommendation] = []

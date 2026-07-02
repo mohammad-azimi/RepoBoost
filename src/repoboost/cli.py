@@ -12,11 +12,12 @@ from repoboost import __version__
 from repoboost.badges import generate_badge
 from repoboost.ci import CIWorkflow, generate_ci_workflow
 from repoboost.config import generate_config_template
+from repoboost.presets import list_presets
 from repoboost.project import ProjectProfile, inspect_project
 from repoboost.recommendations import Recommendation, generate_recommendations
+from repoboost.reports import generate_markdown_report
 from repoboost.scanner import CheckResult, ScanReport, scan_project
 from repoboost.topics import suggest_topics
-from repoboost.reports import MarkdownReport, generate_markdown_report
 
 
 app = typer.Typer(
@@ -182,10 +183,15 @@ def init_config_command(
         "-o",
         help="Custom output path for the config file.",
     ),
-    profile: str = typer.Option(
-        "python-cli",
+    profile: str | None = typer.Option(
+        None,
         "--profile",
         help="Profile name to write into the generated config file.",
+    ),
+    preset_name: str = typer.Option(
+        "python-cli",
+        "--preset",
+        help="Built-in scoring preset to use.",
     ),
     force: bool = typer.Option(
         False,
@@ -206,16 +212,76 @@ def init_config_command(
         )
         raise typer.Exit(code=1)
 
-    _write_text_file(generate_config_template(profile=profile), output_path)
+    try:
+        config_template = generate_config_template(
+            profile=profile or preset_name,
+            preset_name=preset_name,
+        )
+    except ValueError as error:
+        console.print(f"[bold red]{error}[/bold red]")
+        raise typer.Exit(code=1) from error
+
+    _write_text_file(config_template, output_path)
 
     console.print()
     console.print(
         Panel.fit(
-            f"[bold]RepoBoost config created[/bold]\nPath: {output_path}",
+            f"[bold]RepoBoost config created[/bold]\n"
+            f"Preset: {preset_name}\n"
+            f"Path: {output_path}",
             title="Config",
             border_style="blue",
         )
     )
+    console.print()
+
+
+@app.command(name="presets")
+def presets_command(
+    json_output: bool = typer.Option(
+        False,
+        "--json",
+        help="Print built-in presets as JSON.",
+    ),
+) -> None:
+    """
+    List built-in scoring presets.
+    """
+    presets = list_presets()
+
+    if json_output:
+        console.print_json(
+            data={
+                "presets": [
+                    preset.to_dict()
+                    for preset in presets
+                ],
+            }
+        )
+        return
+
+    console.print()
+    console.print(
+        Panel.fit(
+            "[bold]Built-in scoring presets[/bold]\nUse them with: repoboost init-config . --preset <name>",
+            title="Presets",
+            border_style="blue",
+        )
+    )
+
+    table = Table(title="Available presets")
+    table.add_column("Preset")
+    table.add_column("Description")
+    table.add_column("Focus")
+
+    for preset in presets:
+        table.add_row(
+            preset.name,
+            preset.description,
+            ", ".join(preset.recommendation_focus) or "None",
+        )
+
+    console.print(table)
     console.print()
 
 
@@ -431,6 +497,7 @@ def report(
         return
 
     console.print(markdown_report.content)
+
 
 @app.command()
 def badge(
