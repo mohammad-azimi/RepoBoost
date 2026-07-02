@@ -2,6 +2,29 @@
 
 All notable changes to RepoBoost will be documented in this file.
 
+## 0.1.3 - Built-in Scoring Presets
+
+### Added
+
+* Added `repoboost presets` command
+* Added `--preset` option for `repoboost init-config`
+* Added built-in scoring presets for different repository types
+* Added `default` preset
+* Added `python-cli` preset
+* Added `web-app` preset
+* Added `machine-learning` preset
+* Added `portfolio-project` preset
+* Added `docs-only` preset
+* Added preset-aware config generation
+* Added JSON output for preset listing
+* Added tests for scoring presets
+
+### Changed
+
+* Updated package version to `0.1.3`
+* Updated configuration generation to include a `preset` field
+* Updated documentation for built-in scoring presets
+
 ## 0.1.2 - Markdown Report Generation
 
 ### Added

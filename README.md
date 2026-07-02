@@ -1,9 +1,9 @@
 # RepoBoost
 
 ![CI](https://github.com/mohammad-azimi/RepoBoost/actions/workflows/ci.yml/badge.svg)
-[![PyPI](https://img.shields.io/pypi/v/repoboost?label=PyPI&color=orange&cacheSeconds=300)](https://pypi.org/project/repoboost/)
-![Python](https://img.shields.io/badge/python-3.10%2B-orange.svg)
-![License](https://img.shields.io/badge/license-MIT-orange.svg)
+[![PyPI](https://img.shields.io/pypi/v/repoboost?label=PyPI\&color=blue\&cacheSeconds=300)](https://pypi.org/project/repoboost/)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![RepoBoost](https://img.shields.io/badge/RepoBoost-A%20%7C%20100%25-brightgreen)
 
 RepoBoost is a Python command-line tool that audits GitHub repositories and suggests practical improvements for better open-source presentation.
@@ -48,7 +48,7 @@ repoboost --version
 Expected output:
 
 ```text
-RepoBoost 0.1.2
+RepoBoost 0.1.3
 ```
 
 ## Quick Start
@@ -77,10 +77,22 @@ Generate a Markdown report:
 repoboost report . --output REPOBOOST_REPORT.md
 ```
 
+List built-in scoring presets:
+
+```bash
+repoboost presets
+```
+
 Create a configurable scoring file:
 
 ```bash
 repoboost init-config .
+```
+
+Create a config file with a specific preset:
+
+```bash
+repoboost init-config . --preset portfolio-project
 ```
 
 ## Example Output
@@ -104,6 +116,7 @@ Next best improvements:
 * Scores a repository from 0 to 100
 * Gives a grade from A to F
 * Supports configurable scoring with `.repoboost.toml`
+* Includes built-in scoring presets
 * Supports custom check weights
 * Supports disabled checks
 * Shows the active scoring profile in scan reports
@@ -207,12 +220,45 @@ Use a custom config file:
 repoboost report . --config .repoboost.toml
 ```
 
+### `presets`
+
+List built-in scoring presets:
+
+```bash
+repoboost presets
+```
+
+Print presets as JSON:
+
+```bash
+repoboost presets --json
+```
+
+Available presets:
+
+* `default`
+* `python-cli`
+* `web-app`
+* `machine-learning`
+* `portfolio-project`
+* `docs-only`
+
 ### `init-config`
 
 Create a `.repoboost.toml` file:
 
 ```bash
 repoboost init-config .
+```
+
+Create a config file with a built-in preset:
+
+```bash
+repoboost init-config . --preset python-cli
+repoboost init-config . --preset web-app
+repoboost init-config . --preset machine-learning
+repoboost init-config . --preset portfolio-project
+repoboost init-config . --preset docs-only
 ```
 
 Overwrite an existing config file:
@@ -224,7 +270,7 @@ repoboost init-config . --force
 Create a config file with a custom profile name:
 
 ```bash
-repoboost init-config . --profile python-cli
+repoboost init-config . --profile my-project-profile
 ```
 
 ### `topics`
@@ -289,6 +335,49 @@ Set a required score threshold:
 repoboost ci . --fail-under 80
 ```
 
+## Built-in Scoring Presets
+
+RepoBoost includes built-in scoring presets for different repository types.
+
+List all presets:
+
+```bash
+repoboost presets
+```
+
+Print presets as JSON:
+
+```bash
+repoboost presets --json
+```
+
+Use a preset when creating a config file:
+
+```bash
+repoboost init-config . --preset portfolio-project
+```
+
+### Available Presets
+
+| Preset              | Best For                                                                 |
+| ------------------- | ------------------------------------------------------------------------ |
+| `default`           | Balanced scoring for general repositories                                |
+| `python-cli`        | Python command-line tools and installable packages                       |
+| `web-app`           | Deployed web apps, dashboards, and frontend/backend projects             |
+| `machine-learning`  | ML, computer vision, data science, and experiment-based repositories     |
+| `portfolio-project` | Projects that should look strong to recruiters, supervisors, or visitors |
+| `docs-only`         | Documentation-first repositories without code execution requirements     |
+
+Presets help RepoBoost score repositories more fairly based on the type of project.
+
+For example:
+
+* A Python CLI package may need stronger installation, usage, tests, and CI checks.
+* A web app may need stronger screenshots, demo links, and deployment-focused presentation.
+* A machine learning project may need stronger examples, visual outputs, results, and reproducibility notes.
+* A portfolio project may need stronger visual presentation and a clear demo.
+* A docs-only project may not need tests, CI, screenshots, or a live demo.
+
 ## Configurable Scoring
 
 RepoBoost can use a `.repoboost.toml` file to customize scoring for different repository types.
@@ -299,10 +388,17 @@ Create a default config file:
 repoboost init-config .
 ```
 
+Create a config file using a preset:
+
+```bash
+repoboost init-config . --preset machine-learning
+```
+
 Example `.repoboost.toml`:
 
 ```toml
 profile = "python-cli"
+preset = "python-cli"
 fail_under = 90
 disabled_checks = []
 
@@ -310,13 +406,13 @@ disabled_checks = []
 readme = 18
 license = 12
 gitignore = 8
-installation = 10
-usage = 10
-screenshots = 10
-demo_link = 8
+installation = 12
+usage = 12
+screenshots = 6
+demo_link = 4
 badges = 6
 contributing = 6
-tests = 6
+tests = 10
 ci = 6
 
 [recommendations]
@@ -330,11 +426,11 @@ focus = [
 
 You can adjust the score weight of each check depending on the type of project.
 
-For example:
+You can also disable checks that do not make sense for a specific repository:
 
-* A Python CLI tool may prioritize installation, usage examples, tests, and CI.
-* A web app may prioritize screenshots, demo links, deployment, and usage instructions.
-* A machine learning project may prioritize results, visual examples, reproducibility, and documentation.
+```toml
+disabled_checks = ["screenshots", "demo_link"]
+```
 
 ## Markdown Reports
 
@@ -428,7 +524,7 @@ A strong repository should answer these questions quickly:
 * Is it maintained?
 * Are there examples, tests, or screenshots?
 
-RepoBoost helps developers improve these details with clear checks and practical suggestions.
+RepoBoost helps developers improve these details with clear checks, scoring presets, and practical suggestions.
 
 ## Development
 
@@ -471,6 +567,12 @@ Run RepoBoost on itself:
 repoboost scan . --fail-under 90
 ```
 
+List presets:
+
+```bash
+repoboost presets
+```
+
 Generate a Markdown report:
 
 ```bash
@@ -478,6 +580,24 @@ repoboost report . --output REPOBOOST_REPORT.md
 ```
 
 ## Release History
+
+### 0.1.3
+
+Built-in scoring presets.
+
+Added:
+
+* `repoboost presets` command
+* `--preset` option for `repoboost init-config`
+* built-in scoring presets for different repository types
+* `default` preset
+* `python-cli` preset
+* `web-app` preset
+* `machine-learning` preset
+* `portfolio-project` preset
+* `docs-only` preset
+* preset-aware config generation
+* tests for scoring presets
 
 ### 0.1.2
 
@@ -543,12 +663,12 @@ docs/PYPI.md
 ## Roadmap
 
 * Add automatic README section generation
-* Add configurable scoring presets
 * Add more project-type specific recommendations
 * Add portfolio-readiness score
-* Add Markdown report export
 * Add repository comparison mode
 * Add optional auto-fix helpers for common missing files
+* Add Markdown report templates
+* Add richer before-and-after examples
 
 ## Contributing
 
